@@ -1,0 +1,66 @@
+# Core configuration for Coslynx data pipeline
+
+version: "1.0"
+
+# Data sources for the pipeline
+data_sources:
+  - name: "sales_data"
+    type: "csv"
+    path: "data/sales_data.csv"
+    encoding: "utf-8"
+
+  - name: "product_information"
+    type: "excel"
+    path: "data/product_info.xlsx"
+    # Encoding defaults to 'utf-8' if not specified
+
+# SKU-MSKU mapping configuration
+sku_msku_mapping:
+  mapping_file: "mappings/sku_to_msku.csv"
+  sku_column: "SKU"
+  msku_column: "MSKU"
+  combo_sku_delimiter: "+" # Optional delimiter for combo SKUs
+
+# Data cleaning rules for different columns
+data_cleaning_rules:
+  - column: "product_name"
+    data_type: "string"
+    required: true
+    validation_regex: "^[a-zA-Z0-9\\s-]*$" # Alphanumeric and spaces only
+
+  - column: "sale_price"
+    data_type: "number"
+    required: true
+    validation_regex: "^\\d+(\\.\\d{1,2})?$" # Decimal number with up to two decimal places
+    default_value: 0.00
+
+  - column: "sale_date"
+    data_type: "date"
+    required: true
+    validation_regex: "^\\d{4}-\\d{2}-\\d{2}$" # YYYY-MM-DD date format
+
+  - column: "customer_email"
+    data_type: "string"
+    required: false
+    validation_regex: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$" # Email format
+    default_value: "unknown@example.com"
+
+# AI analytics model configuration
+ai_analytics:
+  model_type: "transformers"
+  model_path: "path/to/pretrained/model" # Checkpoint path for Hugging Face Transformers
+  text_to_sql: true
+  calculated_columns:
+    - name: "margin"
+      formula: "revenue - cost"
+    - name: "profit_percentage"
+      formula: "(revenue - cost) / revenue * 100"
+
+# Database connection details
+database:
+  type: "sqlite"
+  name: "wms.db"
+  host: "localhost"
+  port: 5432
+  user: "user"
+  password: "password"
